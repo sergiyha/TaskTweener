@@ -28,5 +28,8 @@ namespace FloatInstructions
 		{
 			EaseFunction = EasingFunction.GetEasingFunction(type);
 		}
+
+		public T GetStart() => Start;
+		public T GetFinish() => Finish;
 	}
 }

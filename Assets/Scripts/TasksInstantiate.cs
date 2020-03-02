@@ -21,7 +21,8 @@ public class TasksInstantiate : MonoBehaviour
 	private void Start()
 	{
 		//TestRotationEulers();
-		TestRotation();
+		//TestRotation();
+		TestValue();
 
 		
 		// _tweener_2 = Object.transform.TweenScale(
@@ -30,6 +31,11 @@ public class TasksInstantiate : MonoBehaviour
 		// 	Duration);
 		
 		Flow();
+	}
+
+	private void TestValue()
+	{
+		_tweener = TweenExtension.TweenValue(0, 10, 10, (v) => { Debug.LogError(v); });
 	}
 
 	private void TestRotation()

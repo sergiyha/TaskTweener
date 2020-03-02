@@ -51,6 +51,7 @@ namespace Tweener
 
 			if (!_shouldBeCanceled)
 			{
+				Apply?.Invoke(_instruction.GetFinish());
 				_completeEvt?.Invoke();
 			}
 		}
