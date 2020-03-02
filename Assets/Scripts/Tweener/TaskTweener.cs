@@ -46,6 +46,7 @@ namespace Tweener
 				_updateEvt?.Invoke();
 
 				await Task.Yield();
+				if (!Application.isPlaying) return;
 			}
 
 			if (!_shouldBeCanceled)

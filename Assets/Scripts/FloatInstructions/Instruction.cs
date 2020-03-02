@@ -4,6 +4,7 @@ namespace FloatInstructions
 {
 	public abstract class Instruction<T> : IInstruction<T> where T : struct
 	{
+		protected const float Precision = 0.00001f;
 		protected Func<float, float, float, float> EaseFunction;
 		protected T Start;
 		protected T Finish;
