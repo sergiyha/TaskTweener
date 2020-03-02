@@ -1,5 +1,6 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
+using Tweener;
+using TweenExtensions;
 using UnityEngine;
 using Debug = UnityEngine.Debug;
 
@@ -16,31 +17,24 @@ public class TasksInstantiate : MonoBehaviour
 
 	private void Start()
 	{
-		
-		EasingFunction.Ease ease = EasingFunction.Ease.EaseInOutQuad;
-
-
 		var localScale = Object.transform.localScale;
-		_tweener = Object.transform.Scale(localScale,
-			new Vector3(localScale.x * ScaleFactor, localScale.y * ScaleFactor, localScale.z * ScaleFactor), Duration);
+		_tweener = Object.transform
+			.Scale(
+				localScale, 
+				new Vector3(localScale.x * ScaleFactor, localScale.y * ScaleFactor, localScale.z * ScaleFactor),
+				Duration).
+			SetOnCancel(() => { Debug.LogError("CANCEL");}).
+			SetOnComplete(() => { Debug.LogError("COMPLETE");}).
+			SetOnStart(() => { Debug.LogError("START"); }).
+			SetOnUpdate(() => { Debug.LogError("UPDATE"); }).
+			SetEaseType(EasingFunction.Ease.EaseInExpo);
+
 		_tweener_2 = Object.transform.Scale(
 			new Vector3(localScale.x * ScaleFactor, localScale.y * ScaleFactor, localScale.z * ScaleFactor),
 			localScale,
 			Duration);
-
-
-		// _tweener_2 = new TaskTweener(
-		// 	Object.GetComponent<Transform>(),
-		// 	new Vector3(localScale.x * ScaleFactor, localScale.y * ScaleFactor, localScale.z * ScaleFactor),
-		// 	localScale,
-		// 	Duration,
-		// 	(v1, v2, l) => Vector3.Lerp(v1, v2, l),
-		// 	Object.GetComponent<Transform>().ScaleAction(),
-		// 	() => Debug.LogError("Completed 1"),
-		// 	() => Debug.LogError("Canceled 1"));
-
+		
 		Flow();
-		//Stop();
 	}
 
 	async Task Flow()
@@ -62,4 +56,3 @@ public class TasksInstantiate : MonoBehaviour
 		Object.transform.Rotate(new Vector3(speed.x, speed.y, speed.z));
 	}
 }
-
