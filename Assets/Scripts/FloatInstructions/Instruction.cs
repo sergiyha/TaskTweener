@@ -31,5 +31,12 @@ namespace FloatInstructions
 
 		public T GetStart() => Start;
 		public T GetFinish() => Finish;
+
+		public void SwitchLastAndFirst()
+		{
+			var s = Start;
+			Start = Finish;
+			Finish = s;
+		}
 	}
 }

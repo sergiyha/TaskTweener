@@ -24,6 +24,9 @@ namespace Tweener
 		private IInstruction<T> _instruction;
 		private float _duration;
 
+		private int _loopCount = 1;
+		private LoopType _loopType = LoopType.Restart;
+
 		private Action _startEvt;
 		private Action _cancelEvt;
 		private Action _completeEvt;
@@ -33,26 +36,46 @@ namespace Tweener
 		{
 			_startEvt?.Invoke();
 
-			for (float i = 0; i < _duration; i += Time.deltaTime)
+			do
 			{
-				if (_shouldBeCanceled)
+				for (float i = 0; i < _duration; i += Time.deltaTime)
 				{
-					_cancelEvt?.Invoke();
-					break;
+					if (_shouldBeCanceled)
+					{
+						_cancelEvt?.Invoke();
+						break;
+					}
+
+					var inbetweening = _instruction.Calculate(i / _duration);
+					Apply?.Invoke(inbetweening);
+					_updateEvt?.Invoke();
+					await Task.Yield();
+					if (!Application.isPlaying) return;
 				}
 
-				var inbetweening = _instruction.Calculate(i / _duration);
-				Apply?.Invoke(inbetweening);
-				_updateEvt?.Invoke();
+				if (_loopCount > 0)
+				{
+					_loopCount--;
+				}
+				
+				CheckLoop();
+			} while (_loopCount != 0);
 
-				await Task.Yield();
-				if (!Application.isPlaying) return;
-			}
 
 			if (!_shouldBeCanceled)
 			{
 				Apply?.Invoke(_instruction.GetFinish());
 				_completeEvt?.Invoke();
+			}
+		}
+
+		private void CheckLoop()
+		{
+			if (_loopCount == 0) return;
+			
+			if (_loopType == LoopType.YoYo)
+			{
+				_instruction.SwitchLastAndFirst();
 			}
 		}
 
@@ -88,6 +111,13 @@ namespace Tweener
 		public ITaskTweener SetEaseType(EasingFunction.Ease type)
 		{
 			_instruction.SetEase(type);
+			return this;
+		}
+
+		public ITaskTweener SetLoop(int count, LoopType type)
+		{
+			_loopCount = count;
+			_loopType = type;
 			return this;
 		}
 

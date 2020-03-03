@@ -7,5 +7,6 @@
 
 		T GetStart();
 		T GetFinish();
+		void SwitchLastAndFirst();
 	}
 }
