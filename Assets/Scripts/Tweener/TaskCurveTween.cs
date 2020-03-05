@@ -11,14 +11,12 @@ namespace Tweener
 		private readonly AnimationCurve _curve;
 		private float _startCurveTime;
 		private float _finalCurveTime;
-		private float _curveTimeDelta;
+
 
 		private float _maxCurvValue;
 		private float _minCurvValue;
 		private float _curveValueDelta;
 		private float _inverseCurveValueDelta;
-
-		private float _inverseDuration;
 
 
 		public TaskCurveTween(
@@ -28,11 +26,11 @@ namespace Tweener
 			float duration) :
 			base(
 				instruction,
-				applyAction)
+				applyAction, 
+				duration)
 		{
 			_curve = curve;
-			Duration = duration;
-			_inverseDuration = 1 / Duration;
+
 			CalculateCurveData();
 		}
 
@@ -40,7 +38,6 @@ namespace Tweener
 		{
 			_startCurveTime = _curve.keys.First().time;
 			_finalCurveTime = _curve.keys.Last().time;
-			_curveTimeDelta = _finalCurveTime - _startCurveTime;
 
 			_maxCurvValue = _curve.keys.Max(k => k.value);
 			_minCurvValue = _curve.keys.Min(k => k.value);
@@ -48,39 +45,12 @@ namespace Tweener
 			_inverseCurveValueDelta = 1 / _curveValueDelta;
 		}
 
-		protected override async Task Loop()
+		protected override void TweenStrategy(float tweenTime)
 		{
-			do
-			{
-				for (float i = 0; i <= Duration; i += Time.deltaTime)
-				{
-					if (ShouldBeCanceled)
-					{
-						CancelEvt?.Invoke();
-						break;
-					}
-
-					var time = Mathf.Lerp(_startCurveTime, _finalCurveTime, i * _inverseDuration);
-					var lerpValue = (_curve.Evaluate(time) - _minCurvValue) * _inverseCurveValueDelta;
-					var inbetweening = Instruction.Calculate(lerpValue);
-					Apply(inbetweening);
-					await Task.Yield();
-					if (!Application.isPlaying) return;
-				}
-
-				if (LoopCount > 0)
-				{
-					LoopCount--;
-				}
-
-				CheckLoopEnd();
-			} while (LoopCount != 0);
-
-			if (!ShouldBeCanceled)
-			{
-				Apply?.Invoke(Instruction.Calculate(_curve.Evaluate(_finalCurveTime)));
-				CompleteEvt?.Invoke();
-			}
+			var time = Mathf.Lerp(_startCurveTime, _finalCurveTime, tweenTime * InverseDuration);
+			var lerpValue = (_curve.Evaluate(time) - _minCurvValue) * _inverseCurveValueDelta;
+			var inbetweening = Instruction.Calculate(lerpValue);
+			Apply(inbetweening);
 		}
 	}
 }

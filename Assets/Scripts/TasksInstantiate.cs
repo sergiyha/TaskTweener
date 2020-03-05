@@ -17,12 +17,19 @@ public class TasksInstantiate : MonoBehaviour
 	private ITaskTweener _tweener;
 	private ITaskTweener _tweener_2;
 
+	public GameObject[] gos;
+
 
 	public Vector3 speed;
 
 	private void Start()
 	{
-		TestValueCurve();
+		for (int i = 0; i < gos.Length; i++)
+		{
+			TestRotation(gos[i]);
+			//TestScaleTween(gos[i]);
+		}
+		//TestValueCurve();
 		//TestRotationEulers();
 		//TestRotation();
 		//TestValue();
@@ -33,7 +40,7 @@ public class TasksInstantiate : MonoBehaviour
 		// 	localScale,
 		// 	Duration);
 
-		Flow();
+		//Flow();
 	}
 
 	private void TestValue()
@@ -56,17 +63,17 @@ public class TasksInstantiate : MonoBehaviour
 	}
 
 	[ContextMenu("Test rotation")]
-	private void TestRotation()
+	private void TestRotation(GameObject go)
 	{
 		var rotation = Object.transform.rotation;
-		_tweener = Object.transform
+		go.transform
 			.TweenRotation(
 				rotation,
 				RefObject.transform.rotation,
-				Duration).SetOnCancel(() => { Debug.LogError("CANCEL"); })
-			.SetOnComplete(() => { Debug.LogError("COMPLETE"); }).SetOnStart(() => { Debug.LogError("START"); })
-			.SetOnUpdate(() => { Debug.LogError("UPDATE"); }).SetEaseType(EasingFunction.Ease.EaseInExpo)
-			.SetLoop(1, LoopType.YoYo);
+				Duration)//.SetOnCancel(() => { Debug.LogError("CANCEL"); })
+		//	.SetOnComplete(() => { Debug.LogError("COMPLETE"); }).SetOnStart(() => { Debug.LogError("START"); })
+//			.SetOnUpdate(() => { Debug.LogError("UPDATE"); }).SetEaseType(EasingFunction.Ease.EaseInExpo)
+			.SetLoop(-1, LoopType.YoYo).Start();
 		//Flow();
 	}
 
@@ -82,16 +89,16 @@ public class TasksInstantiate : MonoBehaviour
 			.SetOnUpdate(() => { Debug.LogError("UPDATE"); }).SetEaseType(EasingFunction.Ease.Linear);
 	}
 
-	private void TestScaleTween()
+	private void TestScaleTween(GameObject go)
 	{
-		var localScale = Object.transform.localScale;
-		_tweener = Object.transform
+		var localScale = go.transform.localScale;
+		go.transform
 			.TweenScale(
 				localScale,
 				new Vector3(localScale.x * ScaleFactor, localScale.y * ScaleFactor, localScale.z * ScaleFactor),
-				Duration).SetOnCancel(() => { Debug.LogError("CANCEL"); })
-			.SetOnComplete(() => { Debug.LogError("COMPLETE"); }).SetOnStart(() => { Debug.LogError("START"); })
-			.SetOnUpdate(() => { Debug.LogError("UPDATE"); }).SetEaseType(EasingFunction.Ease.EaseInExpo);
+				Duration).SetLoop(-1, LoopType.YoYo).Start(); //SetOnCancel(() => { Debug.LogError("CANCEL"); })
+		//.SetOnComplete(() => { Debug.LogError("COMPLETE"); }).SetOnStart(() => { Debug.LogError("START"); })
+		//.SetOnUpdate(() => { Debug.LogError("UPDATE"); }).SetEaseType(EasingFunction.Ease.EaseInExpo);
 	}
 
 	async Task Flow()

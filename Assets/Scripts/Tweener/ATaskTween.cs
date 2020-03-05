@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using FloatInstructions;
+using UnityEngine;
 
 namespace Tweener
 {
@@ -8,15 +9,19 @@ namespace Tweener
 	{
 		protected ATaskTween(
 			IInstruction<T> instruction,
-			Action<T> applyAction)
+			Action<T> applyAction,
+			float duration)
 		{
 			Instruction = instruction;
 			Apply = applyAction;
+			Duration = duration;
+			InverseDuration = 1 / Duration;
 		}
 
 		protected int LoopCount = 1;
 		protected LoopType LoopType = LoopType.Restart;
 		protected  float Duration;
+		protected float InverseDuration;
 
 		private Task _tweener;
 		protected readonly IInstruction<T> Instruction;
@@ -27,7 +32,43 @@ namespace Tweener
 		protected Action UpdateEvt;
 		protected bool ShouldBeCanceled = false;
 
-		protected abstract Task Loop();
+		protected abstract void TweenStrategy(float tweenTime);
+
+			private async Task Loop()
+		{
+			StartEvt?.Invoke();
+			do
+			{
+				for (float i = 0; i < Duration; i += Time.deltaTime)
+				{
+					if (ShouldBeCanceled)
+					{
+						CancelEvt?.Invoke();
+						break;
+					}
+
+					TweenStrategy(i);
+					
+					UpdateEvt?.Invoke();
+					await Task.Yield();
+					if (!Application.isPlaying) return;
+				}
+
+				if (LoopCount > 0)
+				{
+					LoopCount--;
+				}
+				
+				CheckLoopEnd();
+			} while (LoopCount != 0);
+
+
+			if (!ShouldBeCanceled)
+			{
+				Apply?.Invoke(Instruction.GetFinish());
+				CompleteEvt?.Invoke();
+			}
+		}
 
 		protected void CheckLoopEnd()
 		{

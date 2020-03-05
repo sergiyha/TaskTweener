@@ -10,44 +10,14 @@ namespace Tweener
 		public TaskTween(
 			float duration,
 			IInstruction<T> instruction,
-			Action<T> applyAction) : base(instruction,applyAction)
+			Action<T> applyAction) : base(instruction, applyAction, duration)
 		{
-			Duration = duration;
 		}
-		
-		protected override async Task Loop()
+
+		protected override void TweenStrategy(float tweenTime)
 		{
-			StartEvt?.Invoke();
-			do
-			{
-				for (float i = 0; i < Duration; i += Time.deltaTime)
-				{
-					if (ShouldBeCanceled)
-					{
-						CancelEvt?.Invoke();
-						break;
-					}
-
-					
-					UpdateEvt?.Invoke();
-					await Task.Yield();
-					if (!Application.isPlaying) return;
-				}
-
-				if (LoopCount > 0)
-				{
-					LoopCount--;
-				}
-				
-				CheckLoopEnd();
-			} while (LoopCount != 0);
-
-
-			if (!ShouldBeCanceled)
-			{
-				Apply?.Invoke(Instruction.GetFinish());
-				CompleteEvt?.Invoke();
-			}
+			var inbetweening = Instruction.Calculate(tweenTime * InverseDuration);
+			Apply?.Invoke(inbetweening);
 		}
 	}
 }
