@@ -9,7 +9,7 @@ namespace TweenExtensions
 	{
 		public static ITaskTweener TweenScale(this Transform tr, Vector3 from, Vector3 to, float duration)
 		{
-			return new TaskTweener<Vector3>(
+			return new TaskTween<Vector3>(
 				duration,
 				new Vector3TweenInstruction(from, to, EasingFunction.Linear),
 				tr.ScaleAction());
@@ -17,7 +17,7 @@ namespace TweenExtensions
 
 		public static ITaskTweener TweenLocalPosition(this Transform tr, Vector3 from, Vector3 to, float duration)
 		{
-			return new TaskTweener<Vector3>(
+			return new TaskTween<Vector3>(
 				duration,
 				new Vector3TweenInstruction(from, to, EasingFunction.Linear),
 				tr.LocalPositionAction());
@@ -25,7 +25,7 @@ namespace TweenExtensions
 
 		public static ITaskTweener TweenPosition(this Transform tr, Vector3 from, Vector3 to, float duration)
 		{
-			return new TaskTweener<Vector3>(
+			return new TaskTween<Vector3>(
 				duration,
 				new Vector3TweenInstruction(from, to, EasingFunction.Linear),
 				tr.PositionAction());
@@ -33,7 +33,7 @@ namespace TweenExtensions
 
 		public static ITaskTweener TweenRotationEuler(this Transform tr, Vector3 from, Vector3 to, float duration)
 		{
-			return new TaskTweener<Vector3>(
+			return new TaskTween<Vector3>(
 				duration,
 				new Vector3TweenInstruction(from, to, EasingFunction.Linear),
 				tr.RotationEulerAction());
@@ -41,7 +41,7 @@ namespace TweenExtensions
 
 		public static ITaskTweener TweenRotation(this Transform tr, Quaternion from, Quaternion to, float duration)
 		{
-			return new TaskTweener<Quaternion>(
+			return new TaskTween<Quaternion>(
 				duration,
 				new QuaternionInstruction(from, to, EasingFunction.Linear),
 				tr.RotationAction());

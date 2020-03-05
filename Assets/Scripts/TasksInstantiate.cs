@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using Actions;
 using Tweener;
 using TweenExtensions;
 using UnityEngine;
@@ -8,6 +9,7 @@ public class TasksInstantiate : MonoBehaviour
 {
 	public GameObject Object;
 	public GameObject RefObject;
+	public AnimationCurve Curve;
 
 	private Task<string> _task;
 	public float Duration;
@@ -20,8 +22,9 @@ public class TasksInstantiate : MonoBehaviour
 
 	private void Start()
 	{
+		TestValueCurve();
 		//TestRotationEulers();
-		TestRotation();
+		//TestRotation();
 		//TestValue();
 
 
@@ -36,6 +39,20 @@ public class TasksInstantiate : MonoBehaviour
 	private void TestValue()
 	{
 		_tweener = TweenExtension.TweenValue(0, 10, 10, (v) => { Debug.LogError(v); });
+	}
+
+	private void TestValueCurve()
+	{
+		_tweener = TweenExtension.TweenCurveValue(
+			0f,
+			20f,
+			Curve, 3f,
+			(a) =>
+			{
+				Vector3 localScale = Object.transform.localScale;
+				localScale = new Vector3(a, localScale.y, localScale.z);
+				Object.transform.localScale = localScale;
+			}).SetLoop(-1, LoopType.YoYo);
 	}
 
 	[ContextMenu("Test rotation")]

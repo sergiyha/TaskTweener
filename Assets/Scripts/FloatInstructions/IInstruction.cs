@@ -4,7 +4,6 @@
 	{
 		T Calculate(float time);
 		void SetEase(EasingFunction.Ease type);
-
 		T GetStart();
 		T GetFinish();
 		void SwitchLastAndFirst();
