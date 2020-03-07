@@ -20,7 +20,7 @@ namespace Tweener
 
 		protected int LoopCount = 1;
 		protected LoopType LoopType = LoopType.Restart;
-		protected  float Duration;
+		protected float Duration;
 		protected float InverseDuration;
 
 		private Task _tweener;
@@ -34,7 +34,7 @@ namespace Tweener
 
 		protected abstract void TweenStrategy(float tweenTime);
 
-			private async Task Loop()
+		private async Task Loop()
 		{
 			StartEvt?.Invoke();
 			do
@@ -44,11 +44,12 @@ namespace Tweener
 					if (ShouldBeCanceled)
 					{
 						CancelEvt?.Invoke();
+						ResetTween();
 						break;
 					}
 
 					TweenStrategy(i);
-					
+
 					UpdateEvt?.Invoke();
 					await Task.Yield();
 					if (!Application.isPlaying) return;
@@ -58,7 +59,7 @@ namespace Tweener
 				{
 					LoopCount--;
 				}
-				
+
 				CheckLoopEnd();
 			} while (LoopCount != 0);
 
@@ -67,7 +68,16 @@ namespace Tweener
 			{
 				Apply?.Invoke(Instruction.GetFinish());
 				CompleteEvt?.Invoke();
+				ResetTween();
 			}
+		}
+
+		private void ResetTween()
+		{
+			StartEvt = null;
+			CancelEvt = null;
+			CompleteEvt = null;
+			UpdateEvt = null;
 		}
 
 		protected void CheckLoopEnd()
@@ -79,7 +89,7 @@ namespace Tweener
 				Instruction.SwitchLastAndFirst();
 			}
 		}
-		
+
 		ITaskTweener ITaskTweener.SetOnStart(Action onStart)
 		{
 			StartEvt = onStart;
