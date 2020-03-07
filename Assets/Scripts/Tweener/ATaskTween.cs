@@ -19,18 +19,22 @@ namespace Tweener
 		}
 
 		protected int LoopCount = 1;
+		protected int InitialLoopCount = 1;
 		protected LoopType LoopType = LoopType.Restart;
 		protected float Duration;
 		protected float InverseDuration;
 
+
 		private Task _tweener;
+		private float _currentTweenTime;
 		protected readonly IInstruction<T> Instruction;
 		protected Action<T> Apply;
 		protected Action StartEvt;
-		protected Action CancelEvt;
+		protected Action StopEvt;
 		protected Action CompleteEvt;
 		protected Action UpdateEvt;
-		protected bool ShouldBeCanceled = false;
+		protected bool ShouldBeStopped = false;
+		protected bool IsPaused = false;
 
 		protected abstract void TweenStrategy(float tweenTime);
 
@@ -39,20 +43,22 @@ namespace Tweener
 			StartEvt?.Invoke();
 			do
 			{
-				for (float i = 0; i < Duration; i += Time.deltaTime)
+				for (_currentTweenTime = 0; _currentTweenTime < Duration; _currentTweenTime += Time.deltaTime)
 				{
-					if (ShouldBeCanceled)
+					if (CheckShouldBeStopped())
 					{
-						CancelEvt?.Invoke();
-						ResetTween();
-						break;
+						return;
 					}
 
-					TweenStrategy(i);
-
+					TweenStrategy(_currentTweenTime);
 					UpdateEvt?.Invoke();
 					await Task.Yield();
 					if (!Application.isPlaying) return;
+
+					if (await WaitPaused())
+					{
+						return;
+					}
 				}
 
 				if (LoopCount > 0)
@@ -64,20 +70,12 @@ namespace Tweener
 			} while (LoopCount != 0);
 
 
-			if (!ShouldBeCanceled)
+			if (!ShouldBeStopped)
 			{
 				Apply?.Invoke(Instruction.GetFinish());
 				CompleteEvt?.Invoke();
-				ResetTween();
+				Reset();
 			}
-		}
-
-		private void ResetTween()
-		{
-			StartEvt = null;
-			CancelEvt = null;
-			CompleteEvt = null;
-			UpdateEvt = null;
 		}
 
 		protected void CheckLoopEnd()
@@ -90,6 +88,31 @@ namespace Tweener
 			}
 		}
 
+		private bool CheckShouldBeStopped()
+		{
+			if (ShouldBeStopped)
+			{
+				StopEvt?.Invoke();
+				Reset();
+				return true;
+			}
+
+			return false;
+		}
+
+		private async Task<bool> WaitPaused()
+		{
+			while (IsPaused)
+			{
+				await Task.Yield();
+				var shouldStop = CheckShouldBeStopped();
+				if (shouldStop)
+					return true;
+			}
+
+			return false;
+		}
+
 		ITaskTweener ITaskTweener.SetOnStart(Action onStart)
 		{
 			StartEvt = onStart;
@@ -98,19 +121,19 @@ namespace Tweener
 
 		ITaskTweener ITaskTweener.SetOnComplete(Action onComplete)
 		{
-			CompleteEvt = onComplete;
+			CompleteEvt += onComplete;
 			return this;
 		}
 
-		ITaskTweener ITaskTweener.SetOnCancel(Action onCancel)
+		public ITaskTweener SetOnStopped(Action onStop)
 		{
-			CancelEvt = onCancel;
+			StopEvt += onStop;
 			return this;
 		}
 
 		ITaskTweener ITaskTweener.SetOnUpdate(Action onUpdate)
 		{
-			UpdateEvt = onUpdate;
+			UpdateEvt += onUpdate;
 			return this;
 		}
 
@@ -122,6 +145,7 @@ namespace Tweener
 
 		ITaskTweener ITaskTweener.SetLoop(int count, LoopType type)
 		{
+			InitialLoopCount = count;
 			LoopCount = count;
 			LoopType = type;
 			return this;
@@ -139,9 +163,27 @@ namespace Tweener
 			await Start();
 		}
 
-		void ITaskTweener.Cancel()
+		void ITaskTweener.Stop()
 		{
-			ShouldBeCanceled = true;
+			ShouldBeStopped = true;
+		}
+
+		public void Reset()
+		{
+			Instruction.ResetInstruction();
+			Apply(Instruction.GetStart());
+			LoopCount = InitialLoopCount;
+			_currentTweenTime = 0;
+		}
+
+		public void Pause()
+		{
+			IsPaused = true;
+		}
+
+		public void Resume()
+		{
+			IsPaused = false;
 		}
 	}
 }

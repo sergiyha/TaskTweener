@@ -8,73 +8,79 @@ using Debug = UnityEngine.Debug;
 
 public class TasksInstantiate : MonoBehaviour
 {
-	
 	public Text ValueChangedTxt;
 	public Image ColorImage;
+	public GameObject[] Test_Objects;
 
 
 	public float Duration;
 
-	public GameObject[] Test_Objects;
 	private List<ITaskTweener> Tweens;
-	
+	private ITaskTweener _taskTweener;
+
+	public bool Example1;
+	public bool Example2;
+
 	private void Start()
 	{
-		//ResetTweens(0);
-		Test_0_TransformRotation().Start();
-		Test_1_TransformPosition().Start();
-		Test_2_TransformScale().Start();
-		Test_4_ValueTween().Start();
-		Test_5_ValueTweenColor().Start();
+		if (Example1)
+			Example_1();
+		else if (Example2)
+			Example_2();
 	}
 
-	private async void ResetTweens(int fromIndex)
+	private void Example_1()
 	{
-		foreach (var tween in Tweens)
-		{
-			tween.Cancel();
-		}
-
-		for (var i = fromIndex; i < Tweens.Count; i++)
-		{
-			await Tweens[i].Start();
-		}
-
-		Debug.LogError("Tweening Finished");
+		Test_0_TransformRotation(-1).Start();
+		Test_1_TransformPosition(-1).Start();
+		Test_2_TransformScale(-1).Start();
+		Test_4_ValueTween(-1).Start();
+		Test_5_ValueTweenColor(-1).Start();
 	}
 
-	private ITaskTweener Test_0_TransformRotation()
+	private async void Example_2()
 	{
- 		var _object = Test_Objects[0].transform;
+		await Test_0_TransformRotation(2).Start();
+		await Test_1_TransformPosition(2).Start();
+		await Test_2_TransformScale(2).Start();
+		await Test_4_ValueTween(2).Start();
+		await Test_5_ValueTweenColor(2).Start();
+		Debug.LogError("All Tweens Done");
+	}
+	
+	private ITaskTweener Test_0_TransformRotation(int loopsCount)
+	{
+		var _object = Test_Objects[0].transform;
 		var objectRotation = _object.transform.rotation;
 		return _object.transform.TweenRotation(objectRotation, new Quaternion(0, 0.7f, 0.5f, 0.5f), Duration)
-			.SetLoop(-1, LoopType.YoYo);
+			.SetLoop(loopsCount, LoopType.YoYo);
 	}
 
-	private ITaskTweener Test_1_TransformPosition()
+	private ITaskTweener Test_1_TransformPosition(int loopsCount)
 	{
 		var _object = Test_Objects[1].transform;
 		Transform transform1;
 		return _object.transform
 			.TweenPosition((transform1 = _object.transform).position, transform1.position + Vector3.down, Duration)
-			.SetLoop(-1, LoopType.YoYo);
+			.SetLoop(loopsCount, LoopType.YoYo);
 	}
 
-	private ITaskTweener Test_2_TransformScale()
+	private ITaskTweener Test_2_TransformScale(int loopsCount)
 	{
 		var _object = Test_Objects[2].transform;
 		var localScale = _object.transform.localScale;
-		return _object.transform.TweenScale(localScale, localScale + Vector3.one, Duration).SetLoop(2, LoopType.YoYo);
+		return _object.transform.TweenScale(localScale, localScale + Vector3.one, Duration)
+			.SetLoop(loopsCount, LoopType.YoYo);
 	}
 
-	private ITaskTweener Test_4_ValueTween()
+	private ITaskTweener Test_4_ValueTween(int loopsCount)
 	{
 		return TweenExtension.TweenValue(0, 10, Duration, (val) => ValueChangedTxt.text = val.ToString())
-			.SetLoop(-1, LoopType.YoYo);
+			.SetLoop(loopsCount, LoopType.YoYo);
 	}
 
-	private ITaskTweener Test_5_ValueTweenColor()
+	private ITaskTweener Test_5_ValueTweenColor(int loopsCount)
 	{
-		return ColorImage.TweenColor(ColorImage.color, Color.magenta, Duration).SetLoop(-1, LoopType.YoYo);
+		return ColorImage.TweenColor(ColorImage.color, Color.magenta, Duration).SetLoop(loopsCount, LoopType.YoYo);
 	}
 }

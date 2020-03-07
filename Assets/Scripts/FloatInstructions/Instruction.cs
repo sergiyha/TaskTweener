@@ -8,16 +8,24 @@ namespace FloatInstructions
 		protected Func<float, float, float, float> EaseFunction;
 		protected T Start;
 		protected T Finish;
+		private InitialInstructionData<T> _instructionInitialData;
 
 		protected Instruction(T start, T finish, Func<float, float, float, float> easeFunction)
 		{
 			EaseFunction = easeFunction;
 			Start = start;
 			Finish = finish;
+			_instructionInitialData = new InitialInstructionData<T>(Start,Finish);
 		}
 
 		//from 0 to 1
 		protected abstract T _calculate(float time);
+
+		public void ResetInstruction()
+		{
+			Start = _instructionInitialData.Start;
+			Finish = _instructionInitialData.End;
+		}
 
 		public T Calculate(float time)
 		{
@@ -37,6 +45,18 @@ namespace FloatInstructions
 			var s = Start;
 			Start = Finish;
 			Finish = s;
+		}
+	}
+	
+	public class InitialInstructionData<T> where T : struct
+	{
+		public T Start;
+		public T End;
+
+		public InitialInstructionData(T getStart,T getFinish)
+		{
+			Start = getStart;
+			End = getFinish;
 		}
 	}
 }
